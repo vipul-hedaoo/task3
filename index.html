@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do App</title>
+    <link rel="icon" href="logo.png" type="image/icon type">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<section style="width:100%" >
+    <div class="l1">
+        <img src="logo.jpg">
+        <h2 style="text-align: center; padding-top:30px;margin-right: auto;margin-left: auto; color:white " >TO-DO LIST WEB APP</h2>
+    </div>
+</section>
+<div id="app">
+    <section style="display:flex; width:50%;margin-top:125px;justify-content: center">
+    <div class="l2">
+        <form id="myform">
+    <div>
+        <label for="taskTitle" style="float:left; ">Task Title:</label>
+        <input type="text" id="taskTitle"/>
+    </div><br>
+    <div>
+        <label for="taskDescription">Task Description:</label>
+        <textarea id="taskDescription"></textarea>
+    </div><br>
+    <div>
+        <button type="submit" onclick="addTask()" style="background-color: #ffab5d;" >Add Task</button>
+    </div></form>
+    </div>
+    </section>
+    <section style="display:flex; width:50%;">
+        <div class="l3">
+    <div>
+    <h2 style="text-align: center;">Pending Tasks</h2>
+    <ul id="pendingTasks" class="tasks"></ul>
+    </div>
+    <div>
+    <h2 style="text-align: center;">Completed Tasks</h2>
+    <ul id="completedTasks" class="tasks"></ul>
+    </div></div>
+    </section>
+</div>
+<script>
+    function addTask() {
+        const title = document.getElementById('taskTitle').value.trim();
+        const description = document.getElementById('taskDescription').value.trim();
+
+        if (title === '') {
+            alert('Please enter a task title');
+            return;
+        }
+
+        const task = {
+            title,
+            description,
+            completed: false,
+            date: new Date().toLocaleString()
+        };
+
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        tasks.push(task);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+
+        updateUI();
+        document.getElementById("myform").reset();
+       // document.getElementById("taskDescription").reset();
+    }
+
+    function toggleTask(index) {
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        tasks[index].completed = !tasks[index].completed;
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        updateUI();
+    }
+
+    function deleteTask(index) {
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        tasks.splice(index, 1);
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        updateUI();
+    }
+
+    function updateUI() {
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        const pendingTasksElement = document.getElementById('pendingTasks');
+        const completedTasksElement = document.getElementById('completedTasks');
+
+        pendingTasksElement.innerHTML = '';
+        completedTasksElement.innerHTML = '';
+
+        tasks.forEach((task, index) => {
+            const taskElement = document.createElement('li');
+            taskElement.classList.add('task');
+            if (task.completed) {
+                taskElement.classList.add('completed');
+            }
+
+            const titleElement = document.createElement('span');
+            titleElement.textContent = task.title;
+
+            const dateElement = document.createElement('span');
+            dateElement.textContent = task.date;
+
+            const completionCheckbox = document.createElement('input');
+            completionCheckbox.type = 'checkbox';
+            completionCheckbox.checked = task.completed;
+            completionCheckbox.addEventListener('change', () => toggleTask(index));
+
+            const deleteButton = document.createElement('button');
+            deleteButton.classList.add('delete-btn');
+            deleteButton.textContent = 'Delete';
+            deleteButton.addEventListener('click', () => deleteTask(index));
+
+            taskElement.appendChild(titleElement);
+            taskElement.appendChild(dateElement);
+            taskElement.appendChild(completionCheckbox);
+            taskElement.appendChild(deleteButton);
+
+            if (task.completed) {
+                completedTasksElement.appendChild(taskElement);
+            } else {
+                pendingTasksElement.appendChild(taskElement);
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', updateUI);
+</script>
+</body>
+</html>
